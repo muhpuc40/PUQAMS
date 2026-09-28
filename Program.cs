@@ -6,6 +6,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PUQAMS.Data;
 using PUQAMS.Services;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+using PUQAMS.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 

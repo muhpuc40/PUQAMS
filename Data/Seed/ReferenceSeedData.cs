@@ -13,9 +13,50 @@ public sealed record ProgramSeed(
     string ShortName,
     int SortOrder
 );
+public sealed record TeacherSeed(
+    string Username,
+    string DepartmentCode,
+    string Fullname,
+    string Designation = "Lecturer",
+    string Mobile = "",
+    string Email = "",
+    string Address = "PUC",
+    string Gender = "Male",
+    int Priority = 0,
+    string SystemRole = "Administrator"
+);
 
 public static class ReferenceSeedData
 {
+    // Development-only default password. Change it after first login.
+    public const string DefaultPassword = "Premier123456";
+
+    public static readonly IReadOnlyList<TeacherSeed> Teachers =
+    [
+        new("admin_cse", "CSE", "Administrator (CSE)",
+        Mobile: "01675304383", Email: "alokchy04@yahoo.com", Priority: 26),
+    new("moderator_cse", "CSE", "Moderator (CSE)",
+        SystemRole: "Moderator", Priority: 27),
+    new("teacher_cse", "CSE", "Teacher (CSE)",
+        SystemRole: "Teacher", Priority: 28),
+
+    new("admin_eee", "EEE", "Administrator (EEE)"),
+    new("admin_arch", "ARCH", "Administrator (ARCH)"),
+    new("admin_dell", "DELL", "Administrator (DELL)"),
+    new("admin_dlaw", "DLAW", "Administrator (Law)"),
+    new("admin_deco", "DECO", "Administrator (Economics)"),
+    new("admin_dmath", "DMATH", "Administrator (Mathematics)"),
+    new("admin_fbs", "FBS", "Administrator (FBS)"),
+    new("admin_ssd", "SSD", "Administrator (SSD)"),
+    new("admin_ph", "PH", "Administrator (Public Health)"),
+    new("admin_lis", "LIS", "Administrator (LIS)"),
+    new("admin_fdt", "FDT", "Administrator (FDT)"),
+    new("admin_uts_it", "UTS-IT", "Administrator (UTS IT)"),
+    new("admin_uts_business", "UTS-BUSINESS", "Administrator (UTS Business)"),
+    new("admin_diploma_plus", "DIPLOMA-PLUS", "Administrator (Diploma Plus)")
+    ];
+
+
     public static readonly IReadOnlyList<DepartmentSeed> Departments =
     [
         new(
