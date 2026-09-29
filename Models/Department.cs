@@ -1,4 +1,4 @@
-﻿namespace PUQAMS.Models;
+namespace PUQAMS.Models;
 
 public class Department
 {

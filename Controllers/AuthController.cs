@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -35,7 +35,13 @@ public class AuthController : ControllerBase
         [FromBody] LoginRequest request,
         CancellationToken cancellationToken)
     {
-        var username = request.Username.Trim();
+        var username = (request.Username ?? string.Empty).Trim();
+        var password = request.Password ?? string.Empty;
+
+        if (username.Length == 0 || password.Length == 0)
+        {
+            return InvalidCredentials();
+        }
 
         var teacher = await _dbContext.Teachers
             .FirstOrDefaultAsync(x =>
@@ -52,7 +58,7 @@ public class AuthController : ControllerBase
         }
 
         var verify = _passwordHasher.VerifyHashedPassword(
-            teacher, teacher.PasswordHash, request.Password);
+            teacher, teacher.PasswordHash, password);
 
         if (verify == PasswordVerificationResult.Failed)
         {
@@ -62,15 +68,16 @@ public class AuthController : ControllerBase
         if (verify == PasswordVerificationResult.SuccessRehashNeeded)
         {
             teacher.PasswordHash =
-                _passwordHasher.HashPassword(teacher, request.Password);
+                _passwordHasher.HashPassword(teacher, password);
         }
 
         teacher.LastLoginAtUtc = DateTime.UtcNow;
 
-        var response = await IssueTokensAsync(
-            teacher, request.Device, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
-        return Ok(response);
+        return Ok(new TokenResponse(
+            _tokenService.CreateAccessToken(teacher),
+            _tokenService.CreateRefreshToken(teacher)));
     }
 
     // GET: /api/Auth/get_auth
@@ -121,114 +128,44 @@ public class AuthController : ControllerBase
     }
 
     // POST: /api/Auth/refresh
+    // Body: { "refresh_token": "..." }
+    // Returns a new access token and a new refresh token.
     [AllowAnonymous]
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh(
         [FromBody] RefreshRequest request,
         CancellationToken cancellationToken)
     {
-        var hash = TokenService.Hash(request.RefreshToken);
-        var now = DateTime.UtcNow;
+        var teacherId =
+            _tokenService.ValidateRefreshToken(request.RefreshToken);
 
-        var stored = await _dbContext.RefreshTokens
-            .Include(x => x.Teacher)
-            .ThenInclude(x => x.Department)
-            .FirstOrDefaultAsync(x => x.TokenHash == hash, cancellationToken);
-
-        if (stored is null)
+        if (teacherId is null)
         {
             return InvalidRefreshToken();
         }
 
-        // A revoked token being reused means it may have been stolen:
-        // revoke every active session of that teacher.
-        if (stored.RevokedAtUtc is not null)
-        {
-            await _dbContext.RefreshTokens
-                .Where(x => x.TeacherId == stored.TeacherId &&
-                            x.RevokedAtUtc == null)
-                .ExecuteUpdateAsync(
-                    s => s.SetProperty(x => x.RevokedAtUtc, now),
-                    cancellationToken);
-
-            return InvalidRefreshToken();
-        }
-
-        if (stored.ExpiresAtUtc <= now ||
-            !stored.Teacher.IsActive ||
-            !stored.Teacher.Department.IsActive)
-        {
-            return InvalidRefreshToken();
-        }
-
-        // Rotate: revoke the old token and issue a new pair.
-        var newRefreshToken = _tokenService.GenerateRefreshToken();
-        var newHash = TokenService.Hash(newRefreshToken);
-
-        stored.RevokedAtUtc = now;
-        stored.ReplacedByTokenHash = newHash;
-
-        _dbContext.RefreshTokens.Add(new RefreshToken
-        {
-            TeacherId = stored.TeacherId,
-            TokenHash = newHash,
-            Device = request.Device ?? stored.Device,
-            CreatedAtUtc = now,
-            ExpiresAtUtc = now.AddDays(_tokenService.RefreshTokenDays)
-        });
-
-        await _dbContext.SaveChangesAsync(cancellationToken);
-
-        return Ok(new TokenResponse(
-            _tokenService.CreateAccessToken(stored.Teacher),
-            newRefreshToken));
-    }
-
-    // POST: /api/Auth/logout
-    [Authorize]
-    [HttpPost("logout")]
-    public async Task<IActionResult> Logout(
-        [FromBody] RefreshRequest request,
-        CancellationToken cancellationToken)
-    {
-        var hash = TokenService.Hash(request.RefreshToken);
-
-        await _dbContext.RefreshTokens
-            .Where(x => x.TokenHash == hash && x.RevokedAtUtc == null)
-            .ExecuteUpdateAsync(
-                s => s.SetProperty(x => x.RevokedAtUtc, DateTime.UtcNow),
+        // Load the teacher so the new access token has fresh role and
+        // department data, and so deactivated users cannot refresh.
+        var teacher = await _dbContext.Teachers
+            .AsNoTracking()
+            .Include(x => x.Department)
+            .FirstOrDefaultAsync(
+                x => x.Id == teacherId.Value,
                 cancellationToken);
 
-        return Ok(new ApiResponse<object>(1200, "Success", null));
+        if (teacher is null ||
+            !teacher.IsActive ||
+            !teacher.Department.IsActive)
+        {
+            return InvalidRefreshToken();
+        }
+
+        return Ok(new TokenResponse(
+            _tokenService.CreateAccessToken(teacher),
+            _tokenService.CreateRefreshToken(teacher)));
     }
 
     // -----------------------------------------------------------------
-
-    private async Task<TokenResponse> IssueTokensAsync(
-        Teacher teacher,
-        string? device,
-        CancellationToken cancellationToken)
-    {
-        var refreshToken = _tokenService.GenerateRefreshToken();
-        var now = DateTime.UtcNow;
-
-        _dbContext.RefreshTokens.Add(new RefreshToken
-        {
-            TeacherId = teacher.Id,
-            TokenHash = TokenService.Hash(refreshToken),
-            Device = string.IsNullOrWhiteSpace(device)
-                ? "Unknown"
-                : device.Trim(),
-            CreatedAtUtc = now,
-            ExpiresAtUtc = now.AddDays(_tokenService.RefreshTokenDays)
-        });
-
-        await _dbContext.SaveChangesAsync(cancellationToken);
-
-        return new TokenResponse(
-            _tokenService.CreateAccessToken(teacher),
-            refreshToken);
-    }
 
     private IActionResult InvalidCredentials()
         => Unauthorized(new ApiResponse<object>(

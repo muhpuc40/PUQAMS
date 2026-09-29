@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PUQAMS.Data;
 
 namespace PUQAMS.Controllers;
 
+// Public on purpose: the login screen needs the department list
+// before the user has a token.
 [ApiController]
 [Route("api/v1/departments")]
 [AllowAnonymous]
@@ -12,16 +14,12 @@ public class DepartmentsController : ControllerBase
 {
     private readonly AppDbContext _dbContext;
 
-    public DepartmentsController(
-        AppDbContext dbContext)
+    public DepartmentsController(AppDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
-    // -----------------------------------------------------------------
     // GET: /api/v1/departments
-    // -----------------------------------------------------------------
-
     [HttpGet]
     public async Task<IActionResult> GetDepartments(
         CancellationToken cancellationToken)
@@ -48,10 +46,7 @@ public class DepartmentsController : ControllerBase
         });
     }
 
-    // -----------------------------------------------------------------
     // GET: /api/v1/departments/{departmentId}/programs
-    // -----------------------------------------------------------------
-
     [HttpGet("{departmentId:int}/programs")]
     public async Task<IActionResult> GetProgramsByDepartment(
         int departmentId,
@@ -60,10 +55,7 @@ public class DepartmentsController : ControllerBase
         var department =
             await _dbContext.Departments
                 .AsNoTracking()
-                .Where(x =>
-                    x.Id == departmentId &&
-                    x.IsActive
-                )
+                .Where(x => x.Id == departmentId && x.IsActive)
                 .Select(x => new
                 {
                     id = x.Id,
@@ -84,10 +76,7 @@ public class DepartmentsController : ControllerBase
         var programs =
             await _dbContext.AcademicPrograms
                 .AsNoTracking()
-                .Where(x =>
-                    x.DepartmentId == departmentId &&
-                    x.IsActive
-                )
+                .Where(x => x.DepartmentId == departmentId && x.IsActive)
                 .OrderBy(x => x.SortOrder)
                 .ThenBy(x => x.Name)
                 .Select(x => new
@@ -109,10 +98,7 @@ public class DepartmentsController : ControllerBase
         });
     }
 
-    // -----------------------------------------------------------------
     // GET: /api/v1/departments/tree
-    // -----------------------------------------------------------------
-
     [HttpGet("tree")]
     public async Task<IActionResult> GetDepartmentProgramTree(
         CancellationToken cancellationToken)
@@ -148,8 +134,7 @@ public class DepartmentsController : ControllerBase
         return Ok(new
         {
             success = true,
-            message =
-                "Department and program tree retrieved successfully.",
+            message = "Department and program tree retrieved successfully.",
             data = departments
         });
     }

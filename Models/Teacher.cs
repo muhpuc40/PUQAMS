@@ -1,4 +1,4 @@
-﻿namespace PUQAMS.Models;
+namespace PUQAMS.Models;
 
 public class Teacher
 {
@@ -32,7 +32,4 @@ public class Teacher
     public DateTime? LastLoginAtUtc { get; set; }
 
     public Department Department { get; set; } = null!;
-
-    public ICollection<RefreshToken> RefreshTokens { get; set; }
-        = new List<RefreshToken>();
 }

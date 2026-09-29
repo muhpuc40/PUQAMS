@@ -1,14 +1,14 @@
-﻿using System.Text;
+using System.Security.Claims;
+using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PUQAMS.Data;
-using PUQAMS.Services;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Identity;
 using PUQAMS.Models;
+using PUQAMS.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,19 +40,21 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // JWT SETTINGS
 // =============================================================================
 
-var jwtKey =
-    builder.Configuration["Jwt:Key"];
-
-var jwtIssuer =
-    builder.Configuration["Jwt:Issuer"];
-
-var jwtAudience =
-    builder.Configuration["Jwt:Audience"];
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
 
 if (string.IsNullOrWhiteSpace(jwtKey))
 {
     throw new InvalidOperationException(
         "JWT signing key 'Jwt:Key' is not configured."
+    );
+}
+
+if (jwtKey.Length < 32)
+{
+    throw new InvalidOperationException(
+        "JWT signing key 'Jwt:Key' must be at least 32 characters."
     );
 }
 
@@ -69,6 +71,10 @@ if (string.IsNullOrWhiteSpace(jwtAudience))
         "JWT audience 'Jwt:Audience' is not configured."
     );
 }
+
+builder.Services.Configure<JwtSettings>(
+    builder.Configuration.GetSection("Jwt")
+);
 
 // =============================================================================
 // AUTHENTICATION
@@ -102,13 +108,15 @@ builder.Services
                 ValidateLifetime = true,
 
                 ValidateIssuerSigningKey = true,
-
                 IssuerSigningKey =
                     new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(jwtKey)
                     ),
 
-                ClockSkew = TimeSpan.Zero
+                ClockSkew = TimeSpan.Zero,
+
+                NameClaimType = ClaimTypes.Name,
+                RoleClaimType = ClaimTypes.Role
             };
     });
 
@@ -135,10 +143,7 @@ builder.Services.AddAuthorization(options =>
 
     options.AddPolicy(
         "ModeratorOrAdministrator",
-        policy => policy.RequireRole(
-            "Moderator",
-            "Administrator"
-        )
+        policy => policy.RequireRole("Moderator", "Administrator")
     );
 });
 
@@ -162,7 +167,11 @@ builder.Services
 // APPLICATION SERVICES
 // =============================================================================
 
-builder.Services.AddScoped<ReferenceDataSeeder>();
+builder.Services.AddScoped<TokenService>();
+
+builder.Services.AddScoped<
+    IPasswordHasher<Teacher>,
+    PasswordHasher<Teacher>>();
 
 // =============================================================================
 // SWAGGER
@@ -188,10 +197,7 @@ builder.Services.AddSwaggerGen(options =>
         new OpenApiSecurityScheme
         {
             Name = "Authorization",
-
-            Description =
-                "Enter the JWT access token.",
-
+            Description = "Enter the JWT access token.",
             In = ParameterLocation.Header,
             Type = SecuritySchemeType.Http,
             Scheme = "bearer",
@@ -207,9 +213,7 @@ builder.Services.AddSwaggerGen(options =>
                 {
                     Reference = new OpenApiReference
                     {
-                        Type =
-                            ReferenceType.SecurityScheme,
-
+                        Type = ReferenceType.SecurityScheme,
                         Id = "Bearer"
                     }
                 },
@@ -254,65 +258,44 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // =============================================================================
-// DEVELOPMENT MIGRATION AND SEEDING
+// DEVELOPMENT: APPLY MIGRATIONS AND SEED DATA AUTOMATICALLY
+// (departments, programs and teachers - safe to run on every start)
 // =============================================================================
 
 if (app.Environment.IsDevelopment())
 {
-    await using var scope =
-        app.Services.CreateAsyncScope();
-
-    var serviceProvider =
-        scope.ServiceProvider;
+    await using var scope = app.Services.CreateAsyncScope();
 
     var logger =
-        serviceProvider
+        scope.ServiceProvider
             .GetRequiredService<ILoggerFactory>()
             .CreateLogger("ApplicationStartup");
 
     try
     {
         var dbContext =
-            serviceProvider
-                .GetRequiredService<AppDbContext>();
+            scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        logger.LogInformation(
-            "Applying database migrations."
-        );
+        logger.LogInformation("Applying database migrations.");
 
         await dbContext.Database.MigrateAsync();
 
-        logger.LogInformation(
-            "Database migrations completed."
-        );
+        logger.LogInformation("Database migrations completed.");
 
-        var seeder =
-            serviceProvider
-                .GetRequiredService<ReferenceDataSeeder>();
-
-        logger.LogInformation(
-            "Starting department and program seeding."
-        );
-
-        var seedResult =
-            await seeder.EnsureSeededAsync();
-
-        logger.LogInformation(
-            "Reference data seeded. Departments: {DepartmentCount}, " +
-            "Programs: {ProgramCount}",
-            seedResult.DepartmentCount,
-            seedResult.ProgramCount
-        );
+        // Reference data (departments, programs, teachers, course
+        // versions, courses) is no longer seeded from C#.
+        // Run the accompanying seed.sql script against the database
+        // instead, using a MySQL client of your choice.
     }
     catch (Exception exception)
     {
         logger.LogError(
             exception,
-            "Database migration or seeding failed."
+            "Database migration failed."
         );
 
-        // The server remains running so the error can be inspected
-        // through the console and health endpoint.
+        // The server keeps running so the error can be inspected
+        // through the console and the health endpoint.
     }
 }
 
@@ -331,8 +314,7 @@ if (app.Environment.IsDevelopment())
             "PUQAMS API v1"
         );
 
-        options.DocumentTitle =
-            "PUQAMS API";
+        options.DocumentTitle = "PUQAMS API";
     });
 }
 
@@ -349,9 +331,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-// =============================================================================
-// RUN
-// =============================================================================
 
 await app.RunAsync();

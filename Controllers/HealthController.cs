@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Management;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +22,6 @@ public class HealthController : ControllerBase
         _environment = environment;
     }
 
-    // Only API:
     // GET /api/v1/Health
     [AllowAnonymous]
     [HttpGet]

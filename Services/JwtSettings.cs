@@ -1,4 +1,4 @@
-﻿namespace PUQAMS.Services;
+namespace PUQAMS.Services;
 
 public sealed class JwtSettings
 {
