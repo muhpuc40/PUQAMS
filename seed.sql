@@ -693,4 +693,204 @@ WHERE oc.CourseCode = 'EEE 1102(V4)'
   AND tc.CourseCode = 'CSE 1114(V4)'
 ON DUPLICATE KEY UPDATE IsActive = VALUES(IsActive);
 
+-- ---------------------------------------------------------------------
+-- PLOs (Program Learning Outcomes)
+-- Defined per program, shared by every version of that program.
+-- Seeded here for BSc in CSE (department CSE, program BSC-CSE).
+-- ---------------------------------------------------------------------
+
+INSERT INTO plos (ProgramId, ShortName, Description, Status, IsDeleted, AttainmentEquation)
+SELECT p.Id, 'PLO1', 'Engineering knowledge', 'Active', 0,
+       '[ (0.20 x PLO1.i) + (0.20 x PLO1.ii) + (0.3 x PLO1.iii) + (0.3 x PLO1.iv)]'
+FROM programs p JOIN departments d ON d.Id = p.DepartmentId
+WHERE d.Code = 'CSE' AND p.Code = 'BSC-CSE'
+ON DUPLICATE KEY UPDATE Description=VALUES(Description), Status=VALUES(Status),
+    IsDeleted=VALUES(IsDeleted), AttainmentEquation=VALUES(AttainmentEquation);
+
+INSERT INTO plos (ProgramId, ShortName, Description, Status, IsDeleted, AttainmentEquation)
+SELECT p.Id, 'PLO2', 'Problem analysis', 'Active', 0, ''
+FROM programs p JOIN departments d ON d.Id = p.DepartmentId
+WHERE d.Code = 'CSE' AND p.Code = 'BSC-CSE'
+ON DUPLICATE KEY UPDATE Description=VALUES(Description), Status=VALUES(Status),
+    IsDeleted=VALUES(IsDeleted), AttainmentEquation=VALUES(AttainmentEquation);
+
+INSERT INTO plos (ProgramId, ShortName, Description, Status, IsDeleted, AttainmentEquation)
+SELECT p.Id, 'PLO3', 'Design/development of solutions', 'Active', 0, ''
+FROM programs p JOIN departments d ON d.Id = p.DepartmentId
+WHERE d.Code = 'CSE' AND p.Code = 'BSC-CSE'
+ON DUPLICATE KEY UPDATE Description=VALUES(Description), Status=VALUES(Status),
+    IsDeleted=VALUES(IsDeleted), AttainmentEquation=VALUES(AttainmentEquation);
+
+INSERT INTO plos (ProgramId, ShortName, Description, Status, IsDeleted, AttainmentEquation)
+SELECT p.Id, 'PLO4', 'Conduct investigations of complex problems', 'Active', 0, ''
+FROM programs p JOIN departments d ON d.Id = p.DepartmentId
+WHERE d.Code = 'CSE' AND p.Code = 'BSC-CSE'
+ON DUPLICATE KEY UPDATE Description=VALUES(Description), Status=VALUES(Status),
+    IsDeleted=VALUES(IsDeleted), AttainmentEquation=VALUES(AttainmentEquation);
+
+INSERT INTO plos (ProgramId, ShortName, Description, Status, IsDeleted, AttainmentEquation)
+SELECT p.Id, 'PLO5', 'Modern tool usage', 'Active', 0, ''
+FROM programs p JOIN departments d ON d.Id = p.DepartmentId
+WHERE d.Code = 'CSE' AND p.Code = 'BSC-CSE'
+ON DUPLICATE KEY UPDATE Description=VALUES(Description), Status=VALUES(Status),
+    IsDeleted=VALUES(IsDeleted), AttainmentEquation=VALUES(AttainmentEquation);
+
+INSERT INTO plos (ProgramId, ShortName, Description, Status, IsDeleted, AttainmentEquation)
+SELECT p.Id, 'PLO6', 'The engineer and society', 'Active', 0, ''
+FROM programs p JOIN departments d ON d.Id = p.DepartmentId
+WHERE d.Code = 'CSE' AND p.Code = 'BSC-CSE'
+ON DUPLICATE KEY UPDATE Description=VALUES(Description), Status=VALUES(Status),
+    IsDeleted=VALUES(IsDeleted), AttainmentEquation=VALUES(AttainmentEquation);
+
+INSERT INTO plos (ProgramId, ShortName, Description, Status, IsDeleted, AttainmentEquation)
+SELECT p.Id, 'PLO7', 'Environment and sustainability', 'Active', 0, ''
+FROM programs p JOIN departments d ON d.Id = p.DepartmentId
+WHERE d.Code = 'CSE' AND p.Code = 'BSC-CSE'
+ON DUPLICATE KEY UPDATE Description=VALUES(Description), Status=VALUES(Status),
+    IsDeleted=VALUES(IsDeleted), AttainmentEquation=VALUES(AttainmentEquation);
+
+INSERT INTO plos (ProgramId, ShortName, Description, Status, IsDeleted, AttainmentEquation)
+SELECT p.Id, 'PLO8', 'Ethics', 'Active', 0, ''
+FROM programs p JOIN departments d ON d.Id = p.DepartmentId
+WHERE d.Code = 'CSE' AND p.Code = 'BSC-CSE'
+ON DUPLICATE KEY UPDATE Description=VALUES(Description), Status=VALUES(Status),
+    IsDeleted=VALUES(IsDeleted), AttainmentEquation=VALUES(AttainmentEquation);
+
+INSERT INTO plos (ProgramId, ShortName, Description, Status, IsDeleted, AttainmentEquation)
+SELECT p.Id, 'PLO9', 'Individual work and teamwork', 'Active', 0, ''
+FROM programs p JOIN departments d ON d.Id = p.DepartmentId
+WHERE d.Code = 'CSE' AND p.Code = 'BSC-CSE'
+ON DUPLICATE KEY UPDATE Description=VALUES(Description), Status=VALUES(Status),
+    IsDeleted=VALUES(IsDeleted), AttainmentEquation=VALUES(AttainmentEquation);
+
+INSERT INTO plos (ProgramId, ShortName, Description, Status, IsDeleted, AttainmentEquation)
+SELECT p.Id, 'PLO10', 'Communication', 'Active', 0, ''
+FROM programs p JOIN departments d ON d.Id = p.DepartmentId
+WHERE d.Code = 'CSE' AND p.Code = 'BSC-CSE'
+ON DUPLICATE KEY UPDATE Description=VALUES(Description), Status=VALUES(Status),
+    IsDeleted=VALUES(IsDeleted), AttainmentEquation=VALUES(AttainmentEquation);
+
+INSERT INTO plos (ProgramId, ShortName, Description, Status, IsDeleted, AttainmentEquation)
+SELECT p.Id, 'PLO11', 'Project management and finance', 'Active', 0, ''
+FROM programs p JOIN departments d ON d.Id = p.DepartmentId
+WHERE d.Code = 'CSE' AND p.Code = 'BSC-CSE'
+ON DUPLICATE KEY UPDATE Description=VALUES(Description), Status=VALUES(Status),
+    IsDeleted=VALUES(IsDeleted), AttainmentEquation=VALUES(AttainmentEquation);
+
+INSERT INTO plos (ProgramId, ShortName, Description, Status, IsDeleted, AttainmentEquation)
+SELECT p.Id, 'PLO12', 'Life-long learning', 'Active', 0, ''
+FROM programs p JOIN departments d ON d.Id = p.DepartmentId
+WHERE d.Code = 'CSE' AND p.Code = 'BSC-CSE'
+ON DUPLICATE KEY UPDATE Description=VALUES(Description), Status=VALUES(Status),
+    IsDeleted=VALUES(IsDeleted), AttainmentEquation=VALUES(AttainmentEquation);
+
+-- ---------------------------------------------------------------------
+-- CLOs (Course Learning Outcomes)
+-- Seeded for CSE 1111(V4) - Computer Fundamentals and Ethics.
+-- ---------------------------------------------------------------------
+
+INSERT INTO clos (CourseId, CourseOutcome, Description, IsActive)
+SELECT c.Id, 'CO1', 'Identify the fundamental elements of a computer system.', 1
+FROM courses c WHERE c.CourseCode = 'CSE 1111(V4)'
+ON DUPLICATE KEY UPDATE Description=VALUES(Description), IsActive=VALUES(IsActive);
+
+INSERT INTO clos (CourseId, CourseOutcome, Description, IsActive)
+SELECT c.Id, 'CO2', 'List the basic use of computing and internet technologies.', 1
+FROM courses c WHERE c.CourseCode = 'CSE 1111(V4)'
+ON DUPLICATE KEY UPDATE Description=VALUES(Description), IsActive=VALUES(IsActive);
+
+INSERT INTO clos (CourseId, CourseOutcome, Description, IsActive)
+SELECT c.Id, 'CO3', 'Practice word processing, spreadsheet, and presentation application for performing basic tasks.', 1
+FROM courses c WHERE c.CourseCode = 'CSE 1111(V4)'
+ON DUPLICATE KEY UPDATE Description=VALUES(Description), IsActive=VALUES(IsActive);
+
+INSERT INTO clos (CourseId, CourseOutcome, Description, IsActive)
+SELECT c.Id, 'CO4', 'Classify number systems and their applications in computing.', 1
+FROM courses c WHERE c.CourseCode = 'CSE 1111(V4)'
+ON DUPLICATE KEY UPDATE Description=VALUES(Description), IsActive=VALUES(IsActive);
+
+INSERT INTO clos (CourseId, CourseOutcome, Description, IsActive)
+SELECT c.Id, 'CO5', 'Define computer ethics and privacy issues of computing and the cyber world.', 1
+FROM courses c WHERE c.CourseCode = 'CSE 1111(V4)'
+ON DUPLICATE KEY UPDATE Description=VALUES(Description), IsActive=VALUES(IsActive);
+
+INSERT INTO clos (CourseId, CourseOutcome, Description, IsActive)
+SELECT c.Id, 'CO6', 'Write an individual or group report to disseminate the experiment execution process and findings.', 1
+FROM courses c WHERE c.CourseCode = 'CSE 1111(V4)'
+ON DUPLICATE KEY UPDATE Description=VALUES(Description), IsActive=VALUES(IsActive);
+
+INSERT INTO clos (CourseId, CourseOutcome, Description, IsActive)
+SELECT c.Id, 'CO7', 'Apply problem-solving and modern tool usage to basic computing tasks.', 1
+FROM courses c WHERE c.CourseCode = 'CSE 1111(V4)'
+ON DUPLICATE KEY UPDATE Description=VALUES(Description), IsActive=VALUES(IsActive);
+
+-- ---------------------------------------------------------------------
+-- CLO -> PLO mappings
+-- One CLO can map to more than one PLO (CO7 maps to three).
+-- ---------------------------------------------------------------------
+
+INSERT INTO clo_plos (CloId, PloId)
+SELECT cl.Id, pl.Id
+FROM clos cl
+JOIN courses c ON c.Id = cl.CourseId
+JOIN plos pl JOIN programs pr ON pr.Id = pl.ProgramId JOIN departments d ON d.Id = pr.DepartmentId
+WHERE c.CourseCode = 'CSE 1111(V4)' AND cl.CourseOutcome = 'CO1'
+  AND d.Code = 'CSE' AND pr.Code = 'BSC-CSE' AND pl.ShortName = 'PLO1'
+ON DUPLICATE KEY UPDATE CloId = VALUES(CloId);
+
+INSERT INTO clo_plos (CloId, PloId)
+SELECT cl.Id, pl.Id
+FROM clos cl
+JOIN courses c ON c.Id = cl.CourseId
+JOIN plos pl JOIN programs pr ON pr.Id = pl.ProgramId JOIN departments d ON d.Id = pr.DepartmentId
+WHERE c.CourseCode = 'CSE 1111(V4)' AND cl.CourseOutcome = 'CO2'
+  AND d.Code = 'CSE' AND pr.Code = 'BSC-CSE' AND pl.ShortName = 'PLO1'
+ON DUPLICATE KEY UPDATE CloId = VALUES(CloId);
+
+INSERT INTO clo_plos (CloId, PloId)
+SELECT cl.Id, pl.Id
+FROM clos cl
+JOIN courses c ON c.Id = cl.CourseId
+JOIN plos pl JOIN programs pr ON pr.Id = pl.ProgramId JOIN departments d ON d.Id = pr.DepartmentId
+WHERE c.CourseCode = 'CSE 1111(V4)' AND cl.CourseOutcome = 'CO3'
+  AND d.Code = 'CSE' AND pr.Code = 'BSC-CSE' AND pl.ShortName = 'PLO2'
+ON DUPLICATE KEY UPDATE CloId = VALUES(CloId);
+
+INSERT INTO clo_plos (CloId, PloId)
+SELECT cl.Id, pl.Id
+FROM clos cl
+JOIN courses c ON c.Id = cl.CourseId
+JOIN plos pl JOIN programs pr ON pr.Id = pl.ProgramId JOIN departments d ON d.Id = pr.DepartmentId
+WHERE c.CourseCode = 'CSE 1111(V4)' AND cl.CourseOutcome = 'CO4'
+  AND d.Code = 'CSE' AND pr.Code = 'BSC-CSE' AND pl.ShortName = 'PLO2'
+ON DUPLICATE KEY UPDATE CloId = VALUES(CloId);
+
+INSERT INTO clo_plos (CloId, PloId)
+SELECT cl.Id, pl.Id
+FROM clos cl
+JOIN courses c ON c.Id = cl.CourseId
+JOIN plos pl JOIN programs pr ON pr.Id = pl.ProgramId JOIN departments d ON d.Id = pr.DepartmentId
+WHERE c.CourseCode = 'CSE 1111(V4)' AND cl.CourseOutcome = 'CO5'
+  AND d.Code = 'CSE' AND pr.Code = 'BSC-CSE' AND pl.ShortName = 'PLO8'
+ON DUPLICATE KEY UPDATE CloId = VALUES(CloId);
+
+INSERT INTO clo_plos (CloId, PloId)
+SELECT cl.Id, pl.Id
+FROM clos cl
+JOIN courses c ON c.Id = cl.CourseId
+JOIN plos pl JOIN programs pr ON pr.Id = pl.ProgramId JOIN departments d ON d.Id = pr.DepartmentId
+WHERE c.CourseCode = 'CSE 1111(V4)' AND cl.CourseOutcome = 'CO6'
+  AND d.Code = 'CSE' AND pr.Code = 'BSC-CSE' AND pl.ShortName = 'PLO4'
+ON DUPLICATE KEY UPDATE CloId = VALUES(CloId);
+
+INSERT INTO clo_plos (CloId, PloId)
+SELECT cl.Id, pl.Id
+FROM clos cl
+JOIN courses c ON c.Id = cl.CourseId
+JOIN plos pl JOIN programs pr ON pr.Id = pl.ProgramId JOIN departments d ON d.Id = pr.DepartmentId
+WHERE c.CourseCode = 'CSE 1111(V4)' AND cl.CourseOutcome = 'CO7'
+  AND d.Code = 'CSE' AND pr.Code = 'BSC-CSE' AND pl.ShortName IN ('PLO2','PLO3','PLO5')
+ON DUPLICATE KEY UPDATE CloId = VALUES(CloId);
+
+
 COMMIT;

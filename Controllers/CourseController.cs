@@ -90,7 +90,7 @@ public class CourseController : ControllerBase
                 x.CourseCode,
                 x.CourseName,
                 x.CourseCredit,
-                x.CourseType,
+                CourseType = x.CourseType.Name,
                 x.ShortName,
                 x.ExSemester,
                 x.CourseHour,
@@ -144,7 +144,7 @@ public class CourseController : ControllerBase
                 OwnerCode = x.Course.CourseCode,
                 OwnerName = x.Course.CourseName,
                 OwnerCredit = x.Course.CourseCredit,
-                OwnerType = x.Course.CourseType,
+                OwnerType = x.Course.CourseType.Name,
                 OwnerShortName = x.Course.ShortName,
                 OwnerSemester = x.Course.ExSemester,
                 OwnerHour = x.Course.CourseHour,
@@ -156,7 +156,7 @@ public class CourseController : ControllerBase
                 TargetCode = x.EquivalentCourseNav.CourseCode,
                 TargetName = x.EquivalentCourseNav.CourseName,
                 TargetCredit = x.EquivalentCourseNav.CourseCredit,
-                TargetType = x.EquivalentCourseNav.CourseType,
+                TargetType = x.EquivalentCourseNav.CourseType.Name,
                 TargetShortName = x.EquivalentCourseNav.ShortName,
                 TargetSemester = x.EquivalentCourseNav.ExSemester,
                 TargetHour = x.EquivalentCourseNav.CourseHour,
@@ -212,7 +212,7 @@ public class CourseController : ControllerBase
                 OwnerCode = x.Course.CourseCode,
                 OwnerName = x.Course.CourseName,
                 OwnerCredit = x.Course.CourseCredit,
-                OwnerType = x.Course.CourseType,
+                OwnerType = x.Course.CourseType.Name,
                 OwnerShortName = x.Course.ShortName,
                 OwnerSemester = x.Course.ExSemester,
                 OwnerHour = x.Course.CourseHour,
@@ -224,7 +224,7 @@ public class CourseController : ControllerBase
                 TargetCode = x.PrerequisiteCourseNav.CourseCode,
                 TargetName = x.PrerequisiteCourseNav.CourseName,
                 TargetCredit = x.PrerequisiteCourseNav.CourseCredit,
-                TargetType = x.PrerequisiteCourseNav.CourseType,
+                TargetType = x.PrerequisiteCourseNav.CourseType.Name,
                 TargetShortName = x.PrerequisiteCourseNav.ShortName,
                 TargetSemester = x.PrerequisiteCourseNav.ExSemester,
                 TargetHour = x.PrerequisiteCourseNav.CourseHour,
@@ -280,7 +280,7 @@ public class CourseController : ControllerBase
                 OwnerCode = x.Course.CourseCode,
                 OwnerName = x.Course.CourseName,
                 OwnerCredit = x.Course.CourseCredit,
-                OwnerType = x.Course.CourseType,
+                OwnerType = x.Course.CourseType.Name,
                 OwnerShortName = x.Course.ShortName,
                 OwnerSemester = x.Course.ExSemester,
                 OwnerHour = x.Course.CourseHour,
@@ -292,7 +292,7 @@ public class CourseController : ControllerBase
                 TargetCode = x.DominantCourseNav.CourseCode,
                 TargetName = x.DominantCourseNav.CourseName,
                 TargetCredit = x.DominantCourseNav.CourseCredit,
-                TargetType = x.DominantCourseNav.CourseType,
+                TargetType = x.DominantCourseNav.CourseType.Name,
                 TargetShortName = x.DominantCourseNav.ShortName,
                 TargetSemester = x.DominantCourseNav.ExSemester,
                 TargetHour = x.DominantCourseNav.CourseHour,
@@ -312,6 +312,43 @@ public class CourseController : ControllerBase
 
         return Ok(new ApiResponse<List<DominantCourseGroupDto>>(
             1200, "Success", data));
+    }
+
+    // GET: /api/Course/get_versionwise_plos?version_id=4&program_id=1
+    //
+    // PLOs belong to the program, not to a specific curriculum version,
+    // so every version of a program shares the same PLO list. version_id
+    // is only used to confirm it belongs to program_id, the same way the
+    // other endpoints on this controller validate it.
+    [HttpGet("get_versionwise_plos")]
+    public async Task<IActionResult> GetVersionWisePlos(
+        [FromQuery(Name = "version_id")] int versionId,
+        [FromQuery(Name = "program_id")] int programId,
+        CancellationToken cancellationToken)
+    {
+        if (await GetValidatedVersionProgramLevelAsync(
+                versionId, programId, cancellationToken) is null)
+        {
+            return VersionNotFound();
+        }
+
+        var plos = await _dbContext.Plos
+            .AsNoTracking()
+            .Where(x => x.ProgramId == programId && !x.IsDeleted)
+            .OrderBy(x => x.Id)
+            .Select(x => new PloDto
+            {
+                Id = x.Id,
+                PloShortName = x.ShortName,
+                PloDescription = x.Description,
+                Status = x.Status,
+                Deleted = x.IsDeleted ? 1 : 0,
+                ProgramId = x.ProgramId,
+                AttainmentEquation = x.AttainmentEquation
+            })
+            .ToListAsync(cancellationToken);
+
+        return Ok(new ApiResponse<List<PloDto>>(1200, "Success", plos));
     }
 
     // -----------------------------------------------------------------

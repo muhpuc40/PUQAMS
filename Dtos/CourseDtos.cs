@@ -48,3 +48,32 @@ public sealed class DominantCourseGroupDto
     [JsonPropertyName("oCourse")] public CourseDto OCourse { get; set; } = null!;
     [JsonPropertyName("dominantCourse")] public List<CourseDto> DominantCourse { get; set; } = new();
 }
+
+public sealed class PloDto
+{
+    [JsonPropertyName("id")] public int Id { get; set; }
+    [JsonPropertyName("plo_shortname")] public string PloShortName { get; set; } = "";
+    [JsonPropertyName("plo_description")] public string PloDescription { get; set; } = "";
+    [JsonPropertyName("status")] public string Status { get; set; } = "";
+
+    // 0 or 1 (matches the existing API, which uses a number, not a bool).
+    [JsonPropertyName("deleted")] public int Deleted { get; set; }
+
+    [JsonPropertyName("program_id")] public int ProgramId { get; set; }
+    [JsonPropertyName("attainment_equation")] public string AttainmentEquation { get; set; } = "";
+}
+
+public sealed class CloDto
+{
+    [JsonPropertyName("course_outcome")] public string CourseOutcome { get; set; } = "";
+    [JsonPropertyName("description")] public string Description { get; set; } = "";
+
+    // "CSE 1111(V4) - Computer Fundamentals and Ethics (1.5)"
+    [JsonPropertyName("course")] public string Course { get; set; } = "";
+
+    [JsonPropertyName("tbl_course_id")] public int TblCourseId { get; set; }
+    [JsonPropertyName("id")] public int Id { get; set; }
+
+    // Comma-separated PLO short names, e.g. "PLO2,PLO3,PLO5".
+    [JsonPropertyName("plos")] public string Plos { get; set; } = "";
+}

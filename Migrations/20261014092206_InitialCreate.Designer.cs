@@ -12,7 +12,7 @@ using PUQAMS.Data;
 namespace puqams.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260929103059_InitialCreate")]
+    [Migration("20261014092206_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace puqams.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.31")
+                .HasAnnotation("ProductVersion", "8.0.32")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -74,6 +74,90 @@ namespace puqams.Migrations
                     b.ToTable("programs", (string)null);
                 });
 
+            modelBuilder.Entity("PUQAMS.Models.ActualSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("SessionName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessionName")
+                        .IsUnique();
+
+                    b.ToTable("actual_sessions", (string)null);
+                });
+
+            modelBuilder.Entity("PUQAMS.Models.Clo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CourseOutcome")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId", "CourseOutcome")
+                        .IsUnique();
+
+                    b.ToTable("clos", (string)null);
+                });
+
+            modelBuilder.Entity("PUQAMS.Models.CloPlo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CloId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PloId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PloId");
+
+                    b.HasIndex("CloId", "PloId")
+                        .IsUnique();
+
+                    b.ToTable("clo_plos", (string)null);
+                });
+
             modelBuilder.Entity("PUQAMS.Models.Course", b =>
                 {
                     b.Property<int>("Id")
@@ -99,10 +183,8 @@ namespace puqams.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
 
-                    b.Property<string>("CourseType")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("varchar(30)");
+                    b.Property<int>("CourseTypeId")
+                        .HasColumnType("int");
 
                     b.Property<int>("ExSemester")
                         .HasColumnType("int");
@@ -132,10 +214,35 @@ namespace puqams.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CourseTypeId");
+
                     b.HasIndex("VersionId", "CourseCode")
                         .IsUnique();
 
                     b.ToTable("courses", (string)null);
+                });
+
+            modelBuilder.Entity("PUQAMS.Models.CourseType", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("course_types", (string)null);
                 });
 
             modelBuilder.Entity("PUQAMS.Models.CourseVersion", b =>
@@ -264,6 +371,149 @@ namespace puqams.Migrations
                     b.ToTable("equivalent_courses", (string)null);
                 });
 
+            modelBuilder.Entity("PUQAMS.Models.MdRuleDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("AllowA")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("AllowExp")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<bool>("FailIfA")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("FailIfExp")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("InRetake")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("MaxMark")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Ordering")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RuleId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SessionCourseColumn")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RuleId", "SessionCourseColumn")
+                        .IsUnique();
+
+                    b.ToTable("md_rule_details", (string)null);
+                });
+
+            modelBuilder.Entity("PUQAMS.Models.MdRuleName", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("RuleName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseTypeId");
+
+                    b.HasIndex("DepartmentId", "CourseTypeId", "RuleName")
+                        .IsUnique();
+
+                    b.ToTable("md_rulenames", (string)null);
+                });
+
+            modelBuilder.Entity("PUQAMS.Models.Plo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AttainmentEquation")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("ProgramId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ShortName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProgramId", "ShortName")
+                        .IsUnique();
+
+                    b.ToTable("plos", (string)null);
+                });
+
             modelBuilder.Entity("PUQAMS.Models.PrerequisiteCourse", b =>
                 {
                     b.Property<int>("Id")
@@ -291,6 +541,105 @@ namespace puqams.Migrations
                         .IsUnique();
 
                     b.ToTable("prerequisite_courses", (string)null);
+                });
+
+            modelBuilder.Entity("PUQAMS.Models.Session", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ActualSessionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("ExamHeldIn")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("varchar(250)");
+
+                    b.Property<string>("ExamName")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("varchar(250)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsCreditTransfer")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsEnrollmentOpen")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsEnrollmentOpenStu")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsRoutinePublished")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("ProgramId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SessionCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SessionName")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("varchar(250)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActualSessionId");
+
+                    b.HasIndex("SessionCategoryId");
+
+                    b.HasIndex("ProgramId", "Status");
+
+                    b.ToTable("sessions", (string)null);
+                });
+
+            modelBuilder.Entity("PUQAMS.Models.SessionCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("session_categories", (string)null);
                 });
 
             modelBuilder.Entity("PUQAMS.Models.Teacher", b =>
@@ -405,13 +754,51 @@ namespace puqams.Migrations
                     b.Navigation("Department");
                 });
 
+            modelBuilder.Entity("PUQAMS.Models.Clo", b =>
+                {
+                    b.HasOne("PUQAMS.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
+            modelBuilder.Entity("PUQAMS.Models.CloPlo", b =>
+                {
+                    b.HasOne("PUQAMS.Models.Clo", "Clo")
+                        .WithMany("CloPlos")
+                        .HasForeignKey("CloId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PUQAMS.Models.Plo", "Plo")
+                        .WithMany("CloPlos")
+                        .HasForeignKey("PloId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Clo");
+
+                    b.Navigation("Plo");
+                });
+
             modelBuilder.Entity("PUQAMS.Models.Course", b =>
                 {
+                    b.HasOne("PUQAMS.Models.CourseType", "CourseType")
+                        .WithMany()
+                        .HasForeignKey("CourseTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("PUQAMS.Models.CourseVersion", "Version")
                         .WithMany("Courses")
                         .HasForeignKey("VersionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("CourseType");
 
                     b.Navigation("Version");
                 });
@@ -465,6 +852,47 @@ namespace puqams.Migrations
                     b.Navigation("EquivalentCourseNav");
                 });
 
+            modelBuilder.Entity("PUQAMS.Models.MdRuleDetail", b =>
+                {
+                    b.HasOne("PUQAMS.Models.MdRuleName", "Rule")
+                        .WithMany("Details")
+                        .HasForeignKey("RuleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Rule");
+                });
+
+            modelBuilder.Entity("PUQAMS.Models.MdRuleName", b =>
+                {
+                    b.HasOne("PUQAMS.Models.CourseType", "CourseType")
+                        .WithMany()
+                        .HasForeignKey("CourseTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PUQAMS.Models.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CourseType");
+
+                    b.Navigation("Department");
+                });
+
+            modelBuilder.Entity("PUQAMS.Models.Plo", b =>
+                {
+                    b.HasOne("PUQAMS.Models.AcademicProgram", "Program")
+                        .WithMany()
+                        .HasForeignKey("ProgramId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Program");
+                });
+
             modelBuilder.Entity("PUQAMS.Models.PrerequisiteCourse", b =>
                 {
                     b.HasOne("PUQAMS.Models.Course", "Course")
@@ -484,6 +912,33 @@ namespace puqams.Migrations
                     b.Navigation("PrerequisiteCourseNav");
                 });
 
+            modelBuilder.Entity("PUQAMS.Models.Session", b =>
+                {
+                    b.HasOne("PUQAMS.Models.ActualSession", "ActualSession")
+                        .WithMany()
+                        .HasForeignKey("ActualSessionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PUQAMS.Models.AcademicProgram", "Program")
+                        .WithMany()
+                        .HasForeignKey("ProgramId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PUQAMS.Models.SessionCategory", "SessionCategory")
+                        .WithMany()
+                        .HasForeignKey("SessionCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ActualSession");
+
+                    b.Navigation("Program");
+
+                    b.Navigation("SessionCategory");
+                });
+
             modelBuilder.Entity("PUQAMS.Models.Teacher", b =>
                 {
                     b.HasOne("PUQAMS.Models.Department", "Department")
@@ -500,6 +955,11 @@ namespace puqams.Migrations
                     b.Navigation("Versions");
                 });
 
+            modelBuilder.Entity("PUQAMS.Models.Clo", b =>
+                {
+                    b.Navigation("CloPlos");
+                });
+
             modelBuilder.Entity("PUQAMS.Models.CourseVersion", b =>
                 {
                     b.Navigation("Courses");
@@ -508,6 +968,16 @@ namespace puqams.Migrations
             modelBuilder.Entity("PUQAMS.Models.Department", b =>
                 {
                     b.Navigation("Programs");
+                });
+
+            modelBuilder.Entity("PUQAMS.Models.MdRuleName", b =>
+                {
+                    b.Navigation("Details");
+                });
+
+            modelBuilder.Entity("PUQAMS.Models.Plo", b =>
+                {
+                    b.Navigation("CloPlos");
                 });
 #pragma warning restore 612, 618
         }

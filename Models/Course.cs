@@ -17,8 +17,7 @@ public class Course
     // 1.5, 2, 3 ...
     public decimal CourseCredit { get; set; }
 
-    // Theory | Lab
-    public string CourseType { get; set; } = "Theory";
+    public int CourseTypeId { get; set; }
 
     public string ShortName { get; set; } = string.Empty;
 
@@ -35,4 +34,6 @@ public class Course
     public bool IsActive { get; set; } = true;
 
     public CourseVersion Version { get; set; } = null!;
+
+    public CourseType CourseType { get; set; } = null!;
 }
