@@ -1,6 +1,14 @@
 using System.Text.Json.Serialization;
 
 namespace PUQAMS.Dtos;
+public sealed class CourseTypeDto
+{
+    [JsonPropertyName("id")]
+    public int Id { get; set; }
+
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = string.Empty;
+}
 
 public sealed class CourseVersionDto
 {

@@ -106,7 +106,28 @@ public class CourseManagementController : ControllerBase
 
         return Ok(new ApiResponse<List<CloDto>>(1200, "Success", data));
     }
+    [HttpGet("get_course_types")]
+    public async Task<IActionResult> GetCourseTypes(
+        CancellationToken cancellationToken)
+    {
+        var courseTypes = await _dbContext.CourseTypes
+            .AsNoTracking()
+            .Where(x => x.IsActive)
+            .OrderBy(x => x.Id)
+            .Select(x => new
+            {
+                id = x.Id,
+                name = x.Name
+            })
+            .ToListAsync(cancellationToken);
 
+        return Ok(new
+        {
+            success = true,
+            message = "Course types retrieved successfully.",
+            data = courseTypes
+        });
+    }
     // GET: /api/CourseManagement/mdr_list?department_id=1&coursetype_id=2
     //
     // Lists the mark-distribution rule names defined for a department and
